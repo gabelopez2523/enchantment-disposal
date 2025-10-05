@@ -1,6 +1,16 @@
 import "./globals.css";
 import Header from "@/components/Header";
+import type { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Enchantment Disposal",
+  description: "Dumpster rentals and disposal services in New Mexico.",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+  },
+};
 export default function RootLayout({
   children,
 }: {
