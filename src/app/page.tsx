@@ -82,7 +82,7 @@ export default function HomePage() {
           <h2 className="text-3xl font-extrabold mb-8 text-red-700">What Our Customers Are Saying</h2>
           <div className="elfsight-app-06d29834-5d32-496d-91c1-403b5bcb4175"></div> {/* Replace with your actual Elfsight app ID */}
         </div>
-        <script src="https://elfsightcdn.com/platform.js" defer></script>
+        <script src={process.env.GOOGLE_REVIEWS} defer></script>
       </section>
     </>
   );
