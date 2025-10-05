@@ -165,24 +165,24 @@ export default function ServicesPage() {
               <div className="flex flex-col items-center w-full md:w-1/2">
                 <Image
                   src="/images/roll-off dumpster II.png"
-                  alt="Roll-Off Dumpster 14 ft"
+                  alt="Roll-Off Dumpster 14 yard"
                   width={800}
                   height={600}
                   className="w-full h-80 rounded shadow object-cover"
 
                 />
-                <p className="text-sm text-gray-600 italic mt-2 text-center">14 ft Dumpster</p>
+                <p className="text-sm text-gray-600 italic mt-2 text-center">14 Yard Dumpster</p>
               </div>
               <div className="flex flex-col items-center w-full md:w-1/2">
                 <Image
                   src="/images/roll-off dumpster III.jpeg"
-                  alt="Roll-Off Dumpster 20 ft"
+                  alt="Roll-Off Dumpster 20 yard"
                   width={800}
                   height={600}
                   className="w-full h-80 rounded shadow object-cover"
 
                 />
-                <p className="text-sm text-gray-600 italic mt-2 text-center">20 ft Dumpster</p>
+                <p className="text-sm text-gray-600 italic mt-2 text-center">20 Yard Dumpster</p>
               </div>
             </div>
             <p className="mb-4 text-gray-700 font-bold">
