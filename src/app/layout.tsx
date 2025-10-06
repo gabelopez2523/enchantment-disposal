@@ -7,10 +7,11 @@ export const metadata: Metadata = {
   description: "Dumpster rentals and disposal services in New Mexico.",
   icons: {
     icon: [
-      { url: "/favicon.png", type: "image/png" },
+      { url: "favicon.ico", type: "image/x-icon" },
     ],
   },
 };
+//root layout
 export default function RootLayout({
   children,
 }: {
