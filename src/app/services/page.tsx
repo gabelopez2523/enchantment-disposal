@@ -195,7 +195,7 @@ export default function ServicesPage() {
           <h3 className="text-lg sm:text-xl font-semibold mb-4">Additional Notes and Guidelines:</h3>
           <ul className="list-disc list-inside mb-6 text-sm sm:text-base text-gray-700 space-y-2">
             <li>
-              It is dangerous, irresponsible, and against the law to transport any overloaded dumpsters. We enforce a strict overload fee starting at $150.00 for any dumpster that is not "water level" or below the top rail. No exceptions! If any prohibited items are found, an $80.00 fine will be charged.
+              It is dangerous, irresponsible, and against the law to transport any overloaded dumpsters. We enforce a strict overload fee starting at $150.00 for any dumpster that is not &quot;water level&quot; or below the top rail. No exceptions! If any prohibited items are found, an $80.00 fine will be charged.
             </li>
             <li>
               Extra Charges: 
