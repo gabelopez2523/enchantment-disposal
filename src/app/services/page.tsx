@@ -147,8 +147,8 @@ export default function ServicesPage() {
                   <td className="border border-gray-300 px-4 py-2">$320 plus tax</td>
                   <td className="border border-gray-300 px-4 py-2">$62 per ton, plus 4% card fee. We do not charge tax, the landfill charges tax (Not included in rental price. Charged separately).</td>
                   <td className="border border-gray-300 px-4 py-2">$30 per day, plus tax</td>
-                  <td className="border border-gray-300 px-4 py-2">Within rental period, customer is allowed to request a pick-up & return to original location for $120 plus tax. If located in Santa Fe. If located 30 minutes out of Santa Fe, pick-up & return is $220 plus tax. Price could vary on location.</td>
-                  <td className="border border-gray-300 px-4 py-2">If location of delivery is 30 or more minutes away from Santa Fe travel fee is $220 plus tax. Price will vary depending on location if it’s one hour or more away.</td>
+                  <td className="border border-gray-300 px-4 py-2">Within the rental period, customers are allowed to request a pick-up & return to original location for $120 plus tax, if located in Santa Fe. If located 30 minutes out of Santa Fe, pick-up & return is $220 plus tax. Prices can vary depending on location.</td>
+                  <td className="border border-gray-300 px-4 py-2">If location of delivery is 30 or more minutes away from Santa Fe travel fee is $220 plus tax. Price will vary depending on location, if located one hour or more away.</td>
                 </tr>
                 <tr>
                   <td className="border border-gray-300 px-4 py-2">14 Yard Dumpster</td>
@@ -156,8 +156,8 @@ export default function ServicesPage() {
                   <td className="border border-gray-300 px-4 py-2">$290 plus tax</td>
                   <td className="border border-gray-300 px-4 py-2">$62 per ton, plus 4% card fee. We do not charge tax, the landfill charges tax. (Not included in rental price. Charged separately).</td>
                   <td className="border border-gray-300 px-4 py-2">$30 per day, plus tax</td>
-                  <td className="border border-gray-300 px-4 py-2">Within rental period, customer is allowed to request a pick-up & return to original location for $120 plus tax. If located in Santa Fe. If located 30 minutes out of Santa Fe, pick-up & return is $220 plus tax. Price could vary on location.</td>
-                  <td className="border border-gray-300 px-4 py-2">If location of delivery is 30 or more minutes away from Santa Fe travel fee is $220 plus tax. Price will vary depending on location if it’s one hour or more away.</td>
+                  <td className="border border-gray-300 px-4 py-2">Within the rental period, customers are allowed to request a pick-up & return to original location for $120 plus tax, if located in Santa Fe. If located 30 minutes out of Santa Fe, pick-up & return is $220 plus tax. Prices can vary depending on location.</td>
+                  <td className="border border-gray-300 px-4 py-2">If location of delivery is 30 or more minutes away from Santa Fe travel fee is $220 plus tax. Price will vary depending on location, if located one hour or more away.</td>
                 </tr>
               </tbody>
             </table>

@@ -29,14 +29,14 @@ export default function FAQPage() {
         <div>
           <h2 className="text-2xl font-semibold text-700 mb-2">What is included in the dumpster rental price?</h2>
           <p className="text-gray-700">
-            Pricing includes dumpster drop-off, pickup, and renal period. Trash disposal (disposal of trash at facility) will be incurred separately. Delivery fees vary based on your location.
+            Pricing includes dumpster drop-off, pickup, and rental period. Trash disposal (disposal of trash at facility) will be incurred separately. Delivery fees vary based on your location.
           </p>
         </div>
 
         <div>
           <h2 className="text-2xl font-semibold text-700 mb-2">How soon can I schedule a dumpster delivery?</h2>
           <p className="text-gray-700">
-            In most cases, we can deliver your dumpster within 24–48 hours. Contact us to confirm availability for your specific area and timeframe.
+            In most cases, we can deliver your dumpster within 24-48 hours. Contact us to confirm availability for your specific area and timeframe.
           </p>
         </div>
 
