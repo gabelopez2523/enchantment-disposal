@@ -48,7 +48,7 @@ export default function ServicesPage() {
             <li>We offer trash and recycling bins for residential homes. We service areas of Santa Fe county such as La Cienga, Galisteo, Agua Fria, Lamy, and Glorieta. We do NOT service the city of Santa Fe at this time.
             </li>
             <li>
-              Our residential trash service is a bundle of one trash bin and one recycling bin. Customers can choose from two different sizes for both trash and recycling bins.
+              Our residential trash service is a bundle of one trash bin and one recycling bin. Customers can choose from two trash bin sizes and will receive one 45-gallon recycling bin.
             </li>
             <li>
               Customers are able to get multiple bins as well but the cost is per bundle.
@@ -126,7 +126,7 @@ export default function ServicesPage() {
             <table className="min-w-full border border-gray-300 text-gray-700 text-xs sm:text-sm">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Product & Quantity</th>
+                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Product</th>
                   <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Rental Period</th>
                   <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Amount</th>
                   <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Disposal Fee</th>
