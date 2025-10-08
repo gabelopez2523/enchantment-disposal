@@ -1,7 +1,7 @@
-"use client"; // The form uses state and interactivity
+"use client";
 
 import { sendInquiryEmail } from "./actions/sendInquiry";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,23 +11,39 @@ export default function ContactPage() {
     service: "",
     message: "",
   });
+  
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(null); // Clear error on input change
+    setSuccess(false); // Clear success message on input change
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await sendInquiryEmail(formData);
+    setError(null);
+    setSuccess(false);
 
-    if (result?.success) {
-      setFormData({ name: "", email: "", phone: "", service: "", message: "" });
-      alert("Your inquiry has been submitted. We'll get back to you soon!");
-    } else {
-      alert("Something went wrong while sending your message. Please try again later.");
-    }
+    startTransition(async () => {
+      try {
+        const result = await sendInquiryEmail(formData);
+
+        if (result?.success) {
+          setFormData({ name: "", email: "", phone: "", service: "", message: "" });
+          setSuccess(true);
+        } else {
+          setError(result?.error || "Something went wrong. Please try again.");
+        }
+      } catch (err) {
+        console.error("Form submission error:", err);
+        setError("Unable to send your message. Please try again or contact us directly.");
+      }
+    });
   };
 
   return (
@@ -41,6 +57,21 @@ export default function ContactPage() {
           <p className="text-sm sm:text-base text-gray-700 text-center font-bold">
             Got questions or need a dumpster for your project? Reach out today for quick, dependable service and a free quote!
           </p>
+
+          {/* Success Message */}
+          {success && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+              Your inquiry has been submitted. We will get back to you soon!
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
           <input
             className="w-full border border-gray-300 p-3 rounded placeholder-gray-600 text-black text-sm sm:text-base"
             name="name"
@@ -49,6 +80,7 @@ export default function ContactPage() {
             value={formData.name}
             onChange={handleChange}
             required
+            disabled={isPending}
           />
           <input
             className="w-full border border-gray-300 p-3 rounded placeholder-gray-600 text-black text-sm sm:text-base"
@@ -58,6 +90,7 @@ export default function ContactPage() {
             value={formData.email}
             onChange={handleChange}
             required
+            disabled={isPending}
           />
           <input
             className="w-full border border-gray-300 p-3 rounded placeholder-gray-600 text-black text-sm sm:text-base"
@@ -66,6 +99,7 @@ export default function ContactPage() {
             placeholder="Phone (optional)"
             value={formData.phone}
             onChange={handleChange}
+            disabled={isPending}
           />
           <select
             className="w-full border border-gray-300 p-3 rounded text-black text-sm sm:text-base"
@@ -73,6 +107,7 @@ export default function ContactPage() {
             value={formData.service}
             onChange={handleChange}
             required
+            disabled={isPending}
           >
             <option value="">Select a Service</option>
             <option value="Weekly Trash Service">Weekly Trash Service</option>
@@ -88,12 +123,14 @@ export default function ContactPage() {
             value={formData.message}
             onChange={handleChange}
             required
+            disabled={isPending}
           ></textarea>
           <button
             type="submit"
-            className="bg-[#BF0A30] hover:bg-red-800 text-white font-semibold px-6 py-3 rounded shadow w-full"
+            disabled={isPending}
+            className="bg-[#BF0A30] hover:bg-red-800 text-white font-semibold px-6 py-3 rounded shadow w-full disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
           >
-            Send Inquiry
+            {isPending ? "Sending..." : "Send Inquiry"}
           </button>
         </form>
       </section>
