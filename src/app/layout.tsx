@@ -1,5 +1,6 @@
 import "./globals.css";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
     ],
   },
 };
+
 //root layout
 export default function RootLayout({
   children,
@@ -22,11 +24,9 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-white">
         <Header />
 
-        <main className="flex-grow container mx-auto p-4">{children}</main>
+        <main className="flex-grow">{children}</main>
 
-        <footer className="bg-gray-200 p-4 text-center text-black">
-          &copy; {new Date().getFullYear()} Enchantment Disposal LLC. All rights reserved.
-        </footer>
+        <Footer />
       </body>
     </html>
   );
