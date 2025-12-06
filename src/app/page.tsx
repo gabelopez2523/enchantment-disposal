@@ -37,8 +37,9 @@ export default function HomePage() {
           </div>
         </div>
         {/* RIGHT: Image */}
+
         <div
-          className="min-h-[50vh] md:min-h-full bg-cover bg-center rounded-lg order-first md:order-last"
+          className="min-h-[50vh] md:min-h-full bg-cover bg-center rounded-lg order-first md:order-last md:mt-8 scale-95"
           style={{ backgroundImage: "url('/images/background.jpg')" }}
           aria-label="Waste management trucks"
         />
