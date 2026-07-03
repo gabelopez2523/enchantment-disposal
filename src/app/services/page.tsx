@@ -179,7 +179,35 @@ export default function ServicesPage() {
                 <p className="text-sm text-gray-600 italic mt-2 text-center">20 Yard Dumpster</p>
               </div>
             </div>
-            
+
+            <h3 className="text-lg sm:text-xl font-semibold mt-6 mb-4">Dumpster Dimensions:</h3>
+            <div className="overflow-x-auto mb-6">
+              <table className="min-w-full border border-gray-300 text-gray-700 text-xs sm:text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Dumpster Size</th>
+                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Width</th>
+                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Length</th>
+                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Height</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">14-Yard Dumpster</td>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">7.5 ft</td>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">14 ft</td>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">4 ft</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">20-Yard Dumpster</td>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">7.5 ft</td>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">14 ft</td>
+                    <td className="border border-gray-300 px-2 sm:px-4 py-2">5.5 ft (5 ft 6 in)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
             <p className="mt-6 mb-4 text-sm sm:text-base text-gray-700 font-bold">
               If customers are interested in a continuous haul for a work site, hauls start at $150+. Please fill out an interest form if you are interested in this service, and we will contact you to get more information.
             </p>
