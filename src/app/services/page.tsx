@@ -4,6 +4,125 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+function MapPinIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21Z" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="9.5" r="2.5" />
+    </svg>
+  );
+}
+
+function CalendarIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className={className}>
+      <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TruckIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <path d="M3 17h1a2 2 0 0 0 4 0h7a2 2 0 0 0 4 0h1v-4l-3-4h-4V7H3v10Z" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="7.5" cy="17.5" r="1.5" />
+      <circle cx="16.5" cy="17.5" r="1.5" />
+    </svg>
+  );
+}
+
+function ChevronIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className={className}>
+      <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function AlertIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <path d="M12 9v4M12 17h.01M10.3 3.86 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.86a2 2 0 0 0-3.4 0Z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function BinPriceCard({ size, price, note }: { size: string; price: string; note: string }) {
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{size}</p>
+      <p className="text-2xl sm:text-3xl font-extrabold text-[#BF0A30] mt-1">
+        {price}
+        <span className="text-sm font-medium text-gray-500">/mo</span>
+      </p>
+      <p className="text-xs text-gray-500 mt-0.5">{note}</p>
+    </div>
+  );
+}
+
+const residentialAreas = [
+  {
+    title: "Glorieta, Santa Fe County",
+    pickup: "Trash weekly, recycling bi-weekly — pickup day is Friday",
+    bins: [
+      { size: "64 Gallon Trash Bin", price: "$45", note: "plus tax, due the 1st" },
+      { size: "96 Gallon Trash Bin", price: "$65", note: "plus tax, due the 1st" },
+    ],
+  },
+  {
+    title: "Santa Fe County (surrounding areas)",
+    pickup: "Trash weekly, recycling bi-weekly — pickup day varies by address",
+    bins: [
+      { size: "64 Gallon Trash Bin", price: "$35", note: "plus tax, due the 1st" },
+      { size: "96 Gallon Trash Bin", price: "$40", note: "plus tax, due the 1st" },
+    ],
+  },
+];
+
+const dumpsters = [
+  {
+    title: "14 Yard Dumpster",
+    image: "/images/roll-off dumpster II.jpg",
+    alt: "Roll-Off Dumpster 14 yard",
+    price: "$290",
+    period: "7 days",
+    extension: "$30 per day, plus tax",
+    disposalFee:
+      "$62 per ton, plus 4% card fee. We do not charge tax — the landfill charges tax (not included in rental price, charged separately).",
+    pickupReturn:
+      "Within the rental period, customers may request a pick-up & return to the original location for $120 plus tax if located in Santa Fe. If located 30 minutes outside Santa Fe, pick-up & return is $220 plus tax. Prices can vary by location.",
+    travelFee:
+      "If the delivery location is 30 or more minutes from Santa Fe, the travel fee is $220 plus tax. Price will vary depending on location if one hour or more away.",
+  },
+  {
+    title: "20 Yard Dumpster",
+    image: "/images/roll-off dumpster III.jpeg",
+    alt: "Roll-Off Dumpster 20 yard",
+    price: "$320",
+    period: "7 days",
+    extension: "$30 per day, plus tax",
+    disposalFee:
+      "$62 per ton, plus 4% card fee. We do not charge tax — the landfill charges tax (not included in rental price, charged separately).",
+    pickupReturn:
+      "Within the rental period, customers may request a pick-up & return to the original location for $120 plus tax if located in Santa Fe. If located 30 minutes outside Santa Fe, pick-up & return is $220 plus tax. Prices can vary by location.",
+    travelFee:
+      "If the delivery location is 30 or more minutes from Santa Fe, the travel fee is $220 plus tax. Price will vary depending on location if one hour or more away.",
+  },
+];
+
+const dimensions = [
+  { size: "14-Yard Dumpster", width: "7.5 ft", length: "14 ft", height: "4 ft" },
+  { size: "20-Yard Dumpster", width: "7.5 ft", length: "14 ft", height: "5.5 ft (5 ft 6 in)" },
+];
 
 export default function ServicesPage() {
   const [activeTab, setActiveTab] = useState<"residential" | "commercial">(
@@ -12,17 +131,17 @@ export default function ServicesPage() {
 
   return (
     <section className="min-h-screen p-4 sm:p-6 md:p-8 max-w-7xl mx-auto flex-col bg-white">
-     <div className="w-full bg-[#BF0A30] py-6 sm:py-8 px-4 mb-6 text-center rounded text-white">
+      <div className="w-full bg-[#BF0A30] py-6 sm:py-8 px-4 mb-6 text-center rounded text-white">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Our Services</h1>
       </div>
 
       {/* Tab Switcher */}
-      <div className="flex justify-center mb-6 sm:mb-8 border-b border-gray-300">
+      <div className="flex justify-center mb-6 sm:mb-8 gap-2 bg-gray-100 p-1.5 rounded-full max-w-md mx-auto">
         <button
           onClick={() => setActiveTab("residential")}
-          className={`px-4 sm:px-6 py-2 text-base sm:text-lg font-semibold ${
+          className={`flex-1 px-4 sm:px-6 py-2 text-sm sm:text-base font-semibold rounded-full transition-colors ${
             activeTab === "residential"
-              ? "border-b-4 text-[#BF0A30] border-[#BF0A30]"
+              ? "bg-[#BF0A30] text-white shadow"
               : "text-gray-600 hover:text-[#BF0A30]"
           }`}
         >
@@ -30,9 +149,9 @@ export default function ServicesPage() {
         </button>
         <button
           onClick={() => setActiveTab("commercial")}
-          className={`px-4 sm:px-6 py-2 text-base sm:text-lg font-semibold ${
+          className={`flex-1 px-4 sm:px-6 py-2 text-sm sm:text-base font-semibold rounded-full transition-colors ${
             activeTab === "commercial"
-              ? "border-b-4 text-[#BF0A30] border-[#BF0A30]"
+              ? "bg-[#BF0A30] text-white shadow"
               : "text-gray-600 hover:text-[#BF0A30]"
           }`}
         >
@@ -54,61 +173,41 @@ export default function ServicesPage() {
               Customers are able to get multiple bins as well but the cost is per bundle.
             </li>
           </ul>
+
           <h3 className="text-lg sm:text-xl font-semibold mb-4">Service Breakdown:</h3>
-          <div className="overflow-x-auto mb-6">
-            <table className="min-w-full border border-gray-300 text-gray-700 text-xs sm:text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Location</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Bin Size & Type</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Monthly Payment</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Pick up</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Recycling bin size</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Glorieta, in Santa Fe County</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">64 Gallon Trash Bin</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$45, plus tax. Due the 1st of each month.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Trash pick-up is weekly. Recycling is bi-weekly. Schedule pick up day is Friday.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Customers receive a 45-gallon recycling bin.</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Glorieta, in Santa Fe County</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">96 Gallon Trash Bin</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$65, plus tax. Due the 1st of each month.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Trash pick-up is weekly. Recycling is bi-weekly. Schedule pick up day is Friday.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Customers receive a 45-gallon recycling bin.</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Santa Fe County</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">64 Gallon Trash Bin</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$35, plus tax. Due the 1st of each month.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Trash pick-up is weekly. Recycling is bi-weekly. Schedule pick up day varies on address.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Customers receive a 45-gallon recycling bin.</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Santa Fe County</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">96 Gallon Trash Bin</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$40, plus tax. Due the 1st of each month.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Trash pick-up is weekly. Recycling is bi-weekly. Schedule pick up day varies on address.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Customers receive a 45-gallon recycling bin.</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+            {residentialAreas.map((area) => (
+              <div key={area.title} className="rounded-xl border border-gray-200 bg-gray-50 p-5 sm:p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-1">
+                  <MapPinIcon className="w-4 h-4 text-[#BF0A30]" />
+                  <h4 className="font-bold text-gray-900 text-sm sm:text-base">{area.title}</h4>
+                </div>
+                <p className="flex items-start gap-1.5 text-xs text-gray-500 mb-4">
+                  <CalendarIcon className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{area.pickup}</span>
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {area.bins.map((bin) => (
+                    <BinPriceCard key={bin.size} size={bin.size} price={bin.price} note={bin.note} />
+                  ))}
+                </div>
+                <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-4">
+                  <CheckIcon className="w-3.5 h-3.5 text-green-700 shrink-0" />
+                  Includes one 45-gallon recycling bin
+                </p>
+              </div>
+            ))}
           </div>
+
           <p className="text-sm sm:text-base text-gray-700">
-            Delivery fees may vary by location. Contact us for exact quotes in your service area. For more information please fill out an inquiry form. 
-      
+            Delivery fees may vary by location. Contact us for exact quotes in your service area. For more information please fill out an inquiry form.
             <Link
-            href="/contact"
-            className="inline-block bg-red-700 hover:bg-red-800 text-white font-semibold px-3 py-2 rounded shadow mt-2 sm:mt-0 sm:ml-2"
-           >
-            Contact Us
-          </Link>
+              href="/contact"
+              className="inline-block bg-red-700 hover:bg-red-800 text-white font-semibold px-3 py-2 rounded shadow mt-2 sm:mt-0 sm:ml-2"
+            >
+              Contact Us
+            </Link>
           </p>
- 
         </div>
       )}
 
@@ -120,120 +219,115 @@ export default function ServicesPage() {
               From large construction jobs to weekend home cleanups — we are here for contractors, businesses, and homeowners with bigger disposal needs and flexible rental options.
             </p>
           </div>
-          
+
           <h3 className="text-lg sm:text-xl font-semibold mb-4">Service Breakdown:</h3>
-          <div className="overflow-x-auto mb-6">
-            <table className="min-w-full border border-gray-300 text-gray-700 text-xs sm:text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-4 sm:gap-6 mb-6">
+            {dumpsters.map((d) => (
+              <div
+                key={d.title}
+                className="rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col"
+              >
+                <Image
+                  src={d.image}
+                  alt={d.alt}
+                  width={800}
+                  height={600}
+                  className="w-full h-48 sm:h-56 object-cover"
+                />
+                <div className="p-5 sm:p-6 flex flex-col flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TruckIcon className="w-5 h-5 text-[#BF0A30]" />
+                    <h4 className="text-lg font-bold text-gray-900">{d.title}</h4>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#BF0A30]">
+                    {d.price}
+                    <span className="text-sm font-medium text-gray-500"> plus tax / {d.period}</span>
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-700 mt-2">
+                    Extension: <span className="font-medium">{d.extension}</span>
+                  </p>
+
+                  <details className="group mt-4 pt-3 border-t border-gray-200">
+                    <summary className="flex items-center justify-between cursor-pointer list-none font-semibold text-sm text-[#BF0A30]">
+                      Full pricing details
+                      <ChevronIcon className="w-4 h-4 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="mt-3 space-y-3 text-xs sm:text-sm text-gray-700">
+                      <p>
+                        <span className="font-semibold text-gray-900">Disposal Fee: </span>
+                        {d.disposalFee}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-gray-900">Pick-up &amp; Return: </span>
+                        {d.pickupReturn}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-gray-900">Travel Fee: </span>
+                        {d.travelFee}
+                      </p>
+                    </div>
+                  </details>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <h3 className="text-lg sm:text-xl font-semibold mt-6 mb-4">Dumpster Dimensions:</h3>
+          <div className="overflow-x-auto mb-6 rounded-lg border border-gray-200">
+            <table className="min-w-full text-gray-700 text-xs sm:text-sm">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Product</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Rental Period</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Amount</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Disposal Fee</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Extension for 7 days</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Pick-up & Return</th>
-                  <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Travel Fee</th>
+                  <th className="px-3 sm:px-4 py-2 text-left font-semibold">Dumpster Size</th>
+                  <th className="px-3 sm:px-4 py-2 text-left font-semibold">Width</th>
+                  <th className="px-3 sm:px-4 py-2 text-left font-semibold">Length</th>
+                  <th className="px-3 sm:px-4 py-2 text-left font-semibold">Height</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">20 Yard Dumpster</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">7 days</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$320 plus tax</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$62 per ton, plus 4% card fee. We do not charge tax, the landfill charges tax (Not included in rental price. Charged separately).</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$30 per day, plus tax</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Within the rental period, customers are allowed to request a pick-up & return to original location for $120 plus tax, if located in Santa Fe. If located 30 minutes out of Santa Fe, pick-up & return is $220 plus tax. Prices can vary depending on location.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">If location of delivery is 30 or more minutes away from Santa Fe travel fee is $220 plus tax. Price will vary depending on location, if located one hour or more away.</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">14 Yard Dumpster</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">7 days</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$290 plus tax</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$62 per ton, plus 4% card fee. We do not charge tax, the landfill charges tax. (Not included in rental price. Charged separately).</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">$30 per day, plus tax</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">Within the rental period, customers are allowed to request a pick-up & return to original location for $120 plus tax, if located in Santa Fe. If located 30 minutes out of Santa Fe, pick-up & return is $220 plus tax. Prices can vary depending on location.</td>
-                  <td className="border border-gray-300 px-2 sm:px-4 py-2">If location of delivery is 30 or more minutes away from Santa Fe travel fee is $220 plus tax. Price will vary depending on location, if located one hour or more away.</td>
-                </tr>
+                {dimensions.map((row, i) => (
+                  <tr key={row.size} className={i % 2 === 1 ? "bg-gray-50" : undefined}>
+                    <td className="px-3 sm:px-4 py-2 font-medium">{row.size}</td>
+                    <td className="px-3 sm:px-4 py-2">{row.width}</td>
+                    <td className="px-3 sm:px-4 py-2">{row.length}</td>
+                    <td className="px-3 sm:px-4 py-2">{row.height}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-            
-            <div className="flex flex-col md:flex-row justify-center gap-4 sm:gap-6 mt-6">
-              <div className="flex flex-col items-center w-full md:w-1/2">
-                <Image
-                  src="/images/roll-off dumpster II.png"
-                  alt="Roll-Off Dumpster 14 yard"
-                  width={800}
-                  height={600}
-                  className="w-full h-60 sm:h-80 rounded shadow object-cover"
-                />
-                <p className="text-sm text-gray-600 italic mt-2 text-center">14 Yard Dumpster</p>
-              </div>
-              <div className="flex flex-col items-center w-full md:w-1/2">
-                <Image
-                  src="/images/roll-off dumpster III.jpeg"
-                  alt="Roll-Off Dumpster 20 yard"
-                  width={800}
-                  height={600}
-                  className="w-full h-60 sm:h-80 rounded shadow object-cover"
-                />
-                <p className="text-sm text-gray-600 italic mt-2 text-center">20 Yard Dumpster</p>
-              </div>
-            </div>
+          </div>
 
-            <h3 className="text-lg sm:text-xl font-semibold mt-6 mb-4">Dumpster Dimensions:</h3>
-            <div className="overflow-x-auto mb-6">
-              <table className="min-w-full border border-gray-300 text-gray-700 text-xs sm:text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Dumpster Size</th>
-                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Width</th>
-                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Length</th>
-                    <th className="border border-gray-300 px-2 sm:px-4 py-2 text-left">Height</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">14-Yard Dumpster</td>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">7.5 ft</td>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">14 ft</td>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">4 ft</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">20-Yard Dumpster</td>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">7.5 ft</td>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">14 ft</td>
-                    <td className="border border-gray-300 px-2 sm:px-4 py-2">5.5 ft (5 ft 6 in)</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <p className="mt-6 mb-4 text-sm sm:text-base text-gray-700 font-bold">
-              If customers are interested in a continuous haul for a work site, hauls start at $150+. Please fill out an interest form if you are interested in this service, and we will contact you to get more information.
+          <div className="rounded-lg border border-[#BF0A30]/30 bg-red-40 p-4 sm:p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
+            <p className="text-sm sm:text-base text-gray-800 font-bold">
+              Interested in a continuous haul for a work site? Hauls start at $150+. Fill out an interest form and we&apos;ll follow up with more information.
             </p>
-            
             <Link
               href="/contact"
-              className="inline-block bg-red-700 hover:bg-red-800 text-white font-semibold px-4 py-2 rounded shadow"
+              className="inline-block bg-red-700 hover:bg-red-800 text-white font-semibold px-4 py-2 rounded shadow shrink-0 text-center"
             >
               Contact Us
             </Link>
           </div>
-          
+
           <h3 className="text-lg sm:text-xl font-semibold mb-4">Additional Notes and Guidelines:</h3>
-          <ul className="list-disc list-inside mb-6 text-sm sm:text-base text-gray-700 space-y-2">
-            <li>
-              It is dangerous, irresponsible, and against the law to transport any overloaded dumpsters. We enforce a strict overload fee starting at $150.00 for any dumpster that is not &quot;water level&quot; or below the top rail. No exceptions! If any prohibited items are found, an $80.00 fine will be charged.
-            </li>
-            <li>
-              Extra Charges: 
-              <ul className="list-[square] pl-6 mt-2 space-y-1">
-                <li>Television/Computers $15.00 per unit.</li>
-                <li>Appliances with or without refrigerant $15.00 per unit</li>
-                <li>These items will have to be put to the side and not inside the dumpster.</li>
-              </ul>
-            </li>
-          </ul>
+          <div className="rounded-lg border border-amber-300 bg-amber-40 p-4 sm:p-5 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertIcon className="w-5 h-5 text-amber-700 shrink-0" />
+              <p className="font-semibold text-amber-900 text-sm sm:text-base">Please read before renting</p>
+            </div>
+            <ul className="list-disc list-inside text-sm sm:text-base text-gray-700 space-y-2">
+              <li>
+                It is dangerous, irresponsible, and against the law to transport any overloaded dumpsters. We enforce a strict overload fee starting at $150.00 for any dumpster that is not &quot;water level&quot; or below the top rail. No exceptions! If any prohibited items are found, an $80.00 fine will be charged.
+              </li>
+              <li>
+                Extra Charges:
+                <ul className="list-[square] pl-6 mt-2 space-y-1">
+                  <li>Television/Computers $15.00 per unit.</li>
+                  <li>Appliances with or without refrigerant $15.00 per unit</li>
+                  <li>These items will have to be set aside and not placed inside the dumpster.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
         </div>
       )}
     </section>
