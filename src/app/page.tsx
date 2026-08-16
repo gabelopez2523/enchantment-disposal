@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -38,11 +39,16 @@ export default function HomePage() {
         </div>
         {/* RIGHT: Image */}
 
-        <div
-          className="min-h-[50vh] md:min-h-full bg-cover bg-center rounded-lg order-first md:order-last md:mt-8 scale-95"
-          style={{ backgroundImage: "url('/images/background.jpg')" }}
-          aria-label="Waste management trucks"
-        />
+        <div className="relative min-h-[50vh] md:min-h-full rounded-lg order-first md:order-last md:mt-8 scale-95 overflow-hidden">
+          <Image
+            src="/images/background.jpg"
+            alt="Waste management trucks"
+            fill
+            priority
+            sizes="(min-width: 768px) 50vw, 100vw"
+            className="object-cover"
+          />
+        </div>
       </section>
 
       {/* Our Guarantee Section */}

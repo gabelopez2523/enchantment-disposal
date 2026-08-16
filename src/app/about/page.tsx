@@ -34,6 +34,7 @@ export default function AboutPage() {
             alt="Enchantment Disposal Team"
             width={800}
             height={600}
+            priority
             className="w-full max-w-sm h-auto rounded-lg shadow-lg object-cover"
           />
         </div>

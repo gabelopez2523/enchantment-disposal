@@ -18,6 +18,7 @@ export default function Header() {
             alt="Enchantment Disposal Logo"
             width={170}
             height={170}
+            priority
             className="rounded transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
