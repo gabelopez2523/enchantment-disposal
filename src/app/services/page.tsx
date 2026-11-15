@@ -199,6 +199,13 @@ export default function ServicesPage() {
             ))}
           </div>
 
+          <Link
+            href="/signup"
+            className="inline-block bg-red-700 hover:bg-red-800 text-white font-semibold px-6 py-3 rounded shadow mb-6 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+          >
+            Sign Up for Weekly Pickup
+          </Link>
+
           <p className="text-sm sm:text-base text-gray-700">
             Delivery fees may vary by location. Contact us for exact quotes in your service area. For more information please fill out an inquiry form.
             <Link

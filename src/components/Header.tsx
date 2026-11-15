@@ -24,18 +24,21 @@ export default function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-8 text-xl font-semibold absolute left-1/2 transform -translate-x-1/2">
+        <nav className="hidden md:flex items-center gap-8 text-xl font-semibold absolute left-1/2 transform -translate-x-1/2">
           {[
             { href: "/", label: "Home" },
             { href: "/services", label: "Services" },
             { href: "/about", label: "About" },
             { href: "/contact", label: "Contact" },
             { href: "/faq", label: "FAQ" },
+            { href: "/signup", label: "Sign Up for Weekly Pickup" },
           ].map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              className={`relative transition-all duration-300 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:bg-[#BF0A30] hover:after:w-full after:transition-all after:duration-300 ${
+              className={href === "/signup"
+                ? "inline-block bg-red-700 hover:bg-red-800 text-white text-sm font-semibold px-4 py-2 rounded shadow transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                : `relative transition-all duration-300 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:bg-[#BF0A30] hover:after:w-full after:transition-all after:duration-300 ${
                 pathname === href 
                   ? "text-[#BF0A30] after:w-full" 
                   : "text-gray-700 hover:text-[#BF0A30] after:w-0"
@@ -67,12 +70,15 @@ export default function Header() {
             { href: "/about", label: "About" },
             { href: "/contact", label: "Contact" },
             { href: "/faq", label: "FAQ" },
+            { href: "/signup", label: "Sign Up for Weekly Pickup" },
           ].map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setIsMenuOpen(false)}
-              className={`px-6 py-4 font-semibold transition-colors border-b border-gray-100 ${
+              className={href === "/signup"
+                ? "block mx-6 my-4 bg-red-700 hover:bg-red-800 text-white text-sm text-center font-semibold px-4 py-2 rounded shadow transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                : `px-6 py-4 font-semibold transition-colors border-b border-gray-100 ${
                 pathname === href 
                   ? "text-[#BF0A30] bg-red-50" 
                   : "text-gray-700 hover:text-[#BF0A30] hover:bg-gray-50"
