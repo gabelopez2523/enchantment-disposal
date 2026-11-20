@@ -2,6 +2,8 @@ import { randomUUID } from "crypto";
 import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
 import { db } from "./client";
 import { binInventory, reservations } from "./schema";
+import { getWaitingForBinSize } from "./waitlist";
+import { sendSlotAvailableEmail } from "@/lib/email/sendWaitlistEmails";
 
 const HOLD_MINUTES = 30;
 
@@ -127,7 +129,7 @@ export async function createManualReservation(
 
   await db.insert(reservations).values({
     id,
-    source: "phone",
+    source: "phone/email",
     serviceAreaId: input.serviceAreaId,
     binSize: input.binSize,
     status: "pending_verification",
@@ -188,6 +190,9 @@ export async function getReservationById(id: string) {
 
 export interface ListReservationsFilter {
   status?: ReservationStatus;
+  binSize?: string;
+  serviceAreaId?: string;
+  source?: string;
   /** Matches against customer name, email, or address (case-insensitive). */
   search?: string;
   limit?: number;
@@ -199,10 +204,13 @@ export interface ListReservationsFilter {
  * file that lists/searches rather than looking up a single known id.
  */
 export async function listReservations(filter: ListReservationsFilter = {}) {
-  const { status, search, limit = 50, offset = 0 } = filter;
+  const { status, binSize, serviceAreaId, source, search, limit = 50, offset = 0 } = filter;
 
   const conditions = [];
   if (status) conditions.push(eq(reservations.status, status));
+  if (binSize) conditions.push(eq(reservations.binSize, binSize));
+  if (serviceAreaId) conditions.push(eq(reservations.serviceAreaId, serviceAreaId));
+  if (source) conditions.push(eq(reservations.source, source));
   if (search) {
     const pattern = `%${search}%`;
     conditions.push(
@@ -267,6 +275,30 @@ export async function expireReservationBySessionId(sessionId: string): Promise<v
 
   const row = rows[0];
   if (!row) return; // already resolved (paid, or swept as expired) — no-op
+
+  await releaseHeldSlot(row.id, row.binSize, "expired", "pending_payment");
+}
+
+/**
+ * Releases a reservation that never made it to Stripe at all — e.g.
+ * `reserveSlot` succeeded (bin unit held, row inserted) but the immediately
+ * following `stripe.checkout.sessions.create` call then failed, so there's
+ * no checkout session id to key off of (expireReservationBySessionId can't
+ * find it) and no webhook will ever arrive for it either. Without this,
+ * such a reservation just sits in pending_payment holding a unit until the
+ * next *unrelated* checkout attempt happens to sweep expired holds —
+ * called directly, by id, right at the failure site instead so a failed
+ * attempt never leaks capacity even briefly.
+ */
+export async function releaseUncommittedReservation(reservationId: string): Promise<void> {
+  const rows = await db
+    .select({ id: reservations.id, binSize: reservations.binSize })
+    .from(reservations)
+    .where(and(eq(reservations.id, reservationId), eq(reservations.status, "pending_payment")))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return; // already resolved somehow — no-op
 
   await releaseHeldSlot(row.id, row.binSize, "expired", "pending_payment");
 }
@@ -360,4 +392,20 @@ async function releaseHeldSlot(
     .update(binInventory)
     .set({ activeCount: sql`${binInventory.activeCount} - 1`, updatedAt: sql`now()` })
     .where(eq(binInventory.id, binSize));
+
+  // Single chokepoint for every way a unit can free up (cancel, reject,
+  // expire) — check the waitlist here rather than duplicating this check
+  // across every caller. Best-effort: a failed notification shouldn't
+  // undo the release that already succeeded above.
+  try {
+    const waiting = await getWaitingForBinSize(binSize);
+    if (waiting.length > 0) {
+      const result = await sendSlotAvailableEmail(binSize, waiting);
+      if (!result.success) {
+        console.error("Failed to send slot-available email for bin size", binSize, result.error);
+      }
+    }
+  } catch (err) {
+    console.error("Error checking/notifying waitlist for bin size", binSize, err);
+  }
 }

@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { createCheckoutSession } from "./actions/createCheckoutSession";
+import { joinWaitlist } from "@/app/actions/joinWaitlist";
 import { serviceAreas } from "@/data/serviceAreas";
 
 // @mapbox/search-js-react touches `document` at module load, which breaks
@@ -38,6 +39,7 @@ export default function SignupPage() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [waitlistJoined, setWaitlistJoined] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -51,6 +53,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     setErrorCode(null);
+    setWaitlistJoined(false);
 
     const address = addressInputRef.current?.value.trim() ?? "";
     if (!address) {
@@ -75,6 +78,26 @@ export default function SignupPage() {
       } catch (err) {
         console.error("Signup submission error:", err);
         setError("Unable to start checkout. Please try again or contact us directly.");
+      }
+    });
+  };
+
+  const handleJoinWaitlist = () => {
+    const address = addressInputRef.current?.value.trim() ?? "";
+
+    startTransition(async () => {
+      try {
+        const result = await joinWaitlist({ ...formData, address });
+        if (result.success) {
+          setWaitlistJoined(true);
+          setError(null);
+          setErrorCode(null);
+        } else {
+          setError(result.error);
+        }
+      } catch (err) {
+        console.error("Join waitlist error:", err);
+        setError("Unable to join the waitlist. Please try again or contact us directly.");
       }
     });
   };
@@ -116,6 +139,22 @@ export default function SignupPage() {
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
               {renderError()}
+              {errorCode === "out_of_stock" && (
+                <button
+                  type="button"
+                  onClick={handleJoinWaitlist}
+                  disabled={isPending}
+                  className="mt-3 block w-full bg-[#BF0A30] hover:bg-red-800 text-white font-semibold px-4 py-2 rounded shadow disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                >
+                  {isPending ? "Joining..." : "Join the Waitlist"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {waitlistJoined && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+              You&apos;re on the waitlist! We&apos;ll reach out as soon as a spot opens up.
             </div>
           )}
 

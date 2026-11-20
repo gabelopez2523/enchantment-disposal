@@ -3,7 +3,12 @@
 import { z } from "zod";
 import { SIGNUP_FEE_PRICE_ID, findPlan } from "@/data/serviceAreas";
 import { matchAddressToServiceArea } from "@/lib/signupIntake";
-import { attachCheckoutSession, reserveSlot, sweepExpiredReservations } from "@/lib/db/reservations";
+import {
+  attachCheckoutSession,
+  releaseUncommittedReservation,
+  reserveSlot,
+  sweepExpiredReservations,
+} from "@/lib/db/reservations";
 import { getSiteUrl, stripe } from "@/lib/stripe";
 
 const inputSchema = z.object({
@@ -18,7 +23,7 @@ type Input = z.infer<typeof inputSchema>;
 
 type CheckoutResult =
   | { success: true; url: string }
-  | { success: false; error: string; errorCode?: "outside_service_area" };
+  | { success: false; error: string; errorCode?: "outside_service_area" | "out_of_stock" };
 
 export async function createCheckoutSession(input: Input): Promise<CheckoutResult> {
   const parsed = inputSchema.safeParse(input);
@@ -69,41 +74,54 @@ export async function createCheckoutSession(input: Input): Promise<CheckoutResul
       return {
         success: false,
         error:
-          "We're currently out of stock on that bin size. Please check back later or contact us to be notified when more are available.",
+          "We're currently out of stock on that bin size. You can join the waitlist below and we'll reach out as soon as a spot opens up.",
+        errorCode: "out_of_stock",
       };
     }
 
     const siteUrl = getSiteUrl();
 
-    // This phase only collects the one-time signup fee — recurring billing
-    // (plan.recurringPriceId) is set up manually, outside Stripe, for now.
-    // customer_creation is forced so we still get a Stripe Customer record
-    // to reference later, since "payment" mode doesn't create one by default.
-    //
-    // capture_method: "manual" authorizes the card without charging it —
-    // every signup now needs client approval first, so the charge is only
-    // captured on Approve (and the hold is simply canceled on Reject, with
-    // no charge or refund ever happening either way).
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      customer_email: email,
-      customer_creation: "always",
-      payment_intent_data: { capture_method: "manual" },
-      line_items: [{ price: SIGNUP_FEE_PRICE_ID, quantity: 1 }],
-      success_url: `${siteUrl}/signup/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/signup/cancel`,
-      metadata: { reservationId: reservation.id },
-    });
+    try {
+      // This phase only collects the one-time signup fee — recurring billing
+      // (plan.recurringPriceId) is set up manually, outside Stripe, for now.
+      // customer_creation is forced so we still get a Stripe Customer record
+      // to reference later, since "payment" mode doesn't create one by default.
+      //
+      // capture_method: "manual" authorizes the card without charging it —
+      // every signup now needs client approval first, so the charge is only
+      // captured on Approve (and the hold is simply canceled on Reject, with
+      // no charge or refund ever happening either way).
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer_email: email,
+        customer_creation: "always",
+        payment_intent_data: { capture_method: "manual" },
+        line_items: [{ price: SIGNUP_FEE_PRICE_ID, quantity: 1 }],
+        success_url: `${siteUrl}/signup/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${siteUrl}/signup/cancel`,
+        metadata: { reservationId: reservation.id },
+      });
 
-    if (!session.url) {
-      // The reservation's hold still has its expiresAt set, so the next
-      // checkout attempt's lazy sweep will release it on its own.
-      throw new Error("Stripe did not return a Checkout URL.");
+      if (!session.url) {
+        throw new Error("Stripe did not return a Checkout URL.");
+      }
+
+      await attachCheckoutSession(reservation.id, session.id);
+
+      return { success: true, url: session.url };
+    } catch (err) {
+      // Stripe never got a session attached to this reservation, so no
+      // webhook will ever arrive to resolve it, and it has no session id
+      // for the lazy sweep to key off of either — release it immediately
+      // rather than leaving it to hold a bin unit until an unrelated later
+      // checkout attempt happens to sweep expired holds.
+      console.error("Stripe checkout session creation failed:", err);
+      await releaseUncommittedReservation(reservation.id);
+      return {
+        success: false,
+        error: "Something went wrong starting checkout. Please try again or contact us directly.",
+      };
     }
-
-    await attachCheckoutSession(reservation.id, session.id);
-
-    return { success: true, url: session.url };
   } catch (err) {
     console.error("Failed to start checkout:", err);
     return {

@@ -1,6 +1,10 @@
-import { getBinInventorySummary } from "@/lib/db/reservations";
+import { getBinInventorySummary, sweepExpiredReservations } from "@/lib/db/reservations";
 
 export default async function AdminInventoryPage() {
+  // Same safety net as the reservations list — release any abandoned
+  // checkout holds before showing counts, since this page is exactly where
+  // a stale hold would otherwise show up as phantom "in use" capacity.
+  await sweepExpiredReservations();
   const bins = await getBinInventorySummary();
 
   return (

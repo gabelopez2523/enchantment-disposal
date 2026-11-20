@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { createManualSignup } from "./actions";
+import { joinWaitlist } from "@/app/actions/joinWaitlist";
 import { serviceAreas } from "@/data/serviceAreas";
 
 // Same SSR workaround as src/app/signup/page.tsx — @mapbox/search-js-react
@@ -27,6 +28,7 @@ export default function AdminNewSignupPage() {
   const addressInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   // Set while the "outside service area" confirmation is showing — holds
   // the address so the "Yes" button knows what to resubmit.
@@ -35,6 +37,7 @@ export default function AdminNewSignupPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError(null);
+    setErrorCode(null);
   };
 
   const attemptSignup = async (address: string, overrideOutsideArea: boolean) => {
@@ -65,6 +68,7 @@ export default function AdminNewSignupPage() {
       }
 
       setError(result.error);
+      setErrorCode(result.errorCode ?? null);
     } catch (err) {
       console.error("Manual signup submission error:", err);
       setError("Something went wrong. Please try again.");
@@ -74,6 +78,7 @@ export default function AdminNewSignupPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorCode(null);
     setSuccess(null);
     setConfirmAddress(null);
 
@@ -84,6 +89,28 @@ export default function AdminNewSignupPage() {
     }
 
     startTransition(() => attemptSignup(address, false));
+  };
+
+  const handleJoinWaitlist = () => {
+    const address = addressInputRef.current?.value.trim() ?? "";
+
+    startTransition(async () => {
+      try {
+        const result = await joinWaitlist({ ...formData, address });
+        if (result.success) {
+          setSuccess("Customer added to the waitlist — an admin notification email has been sent.");
+          setError(null);
+          setErrorCode(null);
+          setFormData({ planId: "", name: "", email: "", phone: "", stripePaymentIntentId: "" });
+          if (addressInputRef.current) addressInputRef.current.value = "";
+        } else {
+          setError(result.error);
+        }
+      } catch (err) {
+        console.error("Join waitlist error:", err);
+        setError("Unable to join the waitlist. Please try again.");
+      }
+    });
   };
 
   const handleConfirmOverride = () => {
@@ -111,6 +138,16 @@ export default function AdminNewSignupPage() {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
             {error}
+            {errorCode === "out_of_stock" && (
+              <button
+                type="button"
+                onClick={handleJoinWaitlist}
+                disabled={isPending}
+                className="mt-3 block w-full bg-[#BF0A30] hover:bg-red-800 text-white font-semibold px-4 py-2 rounded shadow disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+              >
+                {isPending ? "Adding..." : "Add to Waitlist"}
+              </button>
+            )}
           </div>
         )}
         {success && (

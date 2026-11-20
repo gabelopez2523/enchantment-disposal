@@ -22,7 +22,7 @@ type Input = z.infer<typeof inputSchema>;
 
 type CreateManualSignupResult =
   | { success: true; reservationId: string }
-  | { success: false; error: string; errorCode?: "outside_service_area" };
+  | { success: false; error: string; errorCode?: "outside_service_area" | "out_of_stock" };
 
 /**
  * The web equivalent of scripts/manualSignup.ts — same pipeline, same
@@ -94,7 +94,8 @@ export async function createManualSignup(input: Input): Promise<CreateManualSign
   if (!created) {
     return {
       success: false,
-      error: `Out of stock for bin size "${plan.binSize}" — not reserving a slot.`,
+      error: `Out of stock for bin size "${plan.binSize}" — not reserving a slot. You can add this customer to the waitlist instead.`,
+      errorCode: "out_of_stock",
     };
   }
 

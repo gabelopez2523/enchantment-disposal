@@ -53,3 +53,23 @@ export const reservations = pgTable("reservations", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// Lead capture only — no capacity held, no address verification. A customer
+// lands here when their chosen bin size is out of stock; an admin manually
+// reaches out and runs them through the normal signup flow once a unit
+// frees up (see sendSlotAvailableEmail.ts, triggered from releaseHeldSlot
+// in reservations.ts).
+// status: "waiting" | "resolved"
+export const waitlist = pgTable("waitlist", {
+  id: uuid("id").primaryKey(),
+  status: text("status").notNull().default("waiting"),
+  serviceAreaId: text("service_area_id").notNull(),
+  binSize: text("bin_size").notNull(),
+  planId: text("plan_id").notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone"),
+  addressRaw: text("address_raw").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});

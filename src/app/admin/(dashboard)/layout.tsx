@@ -36,6 +36,9 @@ export default async function AdminDashboardLayout({
             <Link href="/admin/inventory" className="hover:underline">
               Inventory
             </Link>
+            <Link href="/admin/waitlist" className="hover:underline">
+              Waitlist
+            </Link>
           </nav>
           <form action={logout}>
             <button type="submit" className="text-sm font-semibold hover:underline">
