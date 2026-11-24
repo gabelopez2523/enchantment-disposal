@@ -12,5 +12,5 @@ export interface BinInventoryItem {
 
 export const binInventory: BinInventoryItem[] = [
   { id: "64gal", label: "64 Gallon Trash Bin", totalUnits: 30 },
-  { id: "96gal", label: "96 Gallon Trash Bin", totalUnits: 8 },
+  { id: "96gal", label: "96 Gallon Trash Bin", totalUnits: 4 },
 ];

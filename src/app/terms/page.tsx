@@ -7,7 +7,7 @@ export default function TermsPage() {
         <h1 className="text-3xl font-bold text-[#BF0A30] mb-6">
           Terms & Conditions
         </h1>
-        <p className="text-sm text-gray-500 mb-10">Last Updated: October 9, 2025</p>
+        <p className="text-sm text-gray-500 mb-10">Last Updated: November 23, 2026</p>
 
         <p className="mb-6">
           Welcome to <strong>Enchantment Disposal LLC</strong>! These Terms and Conditions outline the rules and
@@ -32,7 +32,7 @@ export default function TermsPage() {
           You may use our website for lawful purposes only. You agree not to:
         </p>
         <ul className="list-disc ml-8 mb-6">
-          <li>Submit false or misleading information through contact forms</li>
+          <li>Submit false or misleading information through contact, signup, or waitlist forms</li>
           <li>Attempt to interfere with the website’s functionality or security</li>
           <li>Use our site to transmit harmful code or spam</li>
         </ul>
@@ -44,33 +44,60 @@ export default function TermsPage() {
           at any time without notice.
         </p>
 
-        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">3. Limitation of Liability</h2>
+        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">
+          3. Residential Trash and Recycling Signup
+        </h2>
+        <p className="mb-6">
+          When you sign up for weekly residential pickup, provide accurate contact information,
+          your full service address, and your preferred plan. Signup is subject to address
+          eligibility, cart availability, and our approval. We may contact you by email or phone
+          to verify your address and confirm your service.
+        </p>
+        <p className="mb-6">
+          At Stripe Checkout, you authorize a temporary hold on your card for the one-time
+          signup fee shown at checkout. We charge the fee when we approve your signup.
+          If we decline your request or the authorization expires before approval, the hold is
+          released without a charge. Your card issuer determines when the hold clears.
+          We contact you separately to arrange recurring monthly billing for your service.
+        </p>
+        <p className="mb-6">
+          If your selected cart size is unavailable, you may have the option to join the
+          waitlist. Joining the waitlist is free and does not reserve a cart or guarantee
+          service. We may contact you when a spot becomes available.
+        </p>
+        <p className="mb-6">
+          See our{" "}
+          <a href="/privacy" className="text-[#BF0A30] hover:underline">Privacy Policy</a>
+          {" "}for details about how we handle signup and waitlist information.
+        </p>
+
+        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">4. Limitation of Liability</h2>
         <p className="mb-6">
           Enchantment Disposal LLC strives to ensure the accuracy of the information presented on this site.
           However, we make no guarantees, warranties, or representations about its completeness or suitability
           for any purpose. We are not liable for any damages arising from your use or inability to use the site.
         </p>
 
-        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">4. Intellectual Property</h2>
+        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">5. Intellectual Property</h2>
         <p className="mb-6">
           All logos, images, text, and other content on this website are the property of Enchantment Disposal
           LLC unless otherwise noted. You may not reproduce, distribute, or use our materials without written
           permission.
         </p>
 
-        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">5. Links to Other Websites</h2>
+        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">6. Links to Other Websites</h2>
         <p className="mb-6">
           Our website may contain links to external websites. We are not responsible for the content or
           practices of any third-party sites.
         </p>
 
-        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">6. Changes to These Terms</h2>
+        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">7. Changes to These Terms</h2>
         <p className="mb-6">
           We may update these Terms & Conditions periodically. Any changes will be posted on this page with an
           updated “Last Updated” date.
         </p>
 
-        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">7. Contact Us</h2>
+        <h2 className="text-2xl font-semibold text-[#BF0A30] mt-10 mb-3">8. Contact Us</h2>
         <p className="mb-6">
           If you have any questions about these Terms, please contact us at:
         </p>
