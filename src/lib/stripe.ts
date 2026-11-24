@@ -32,3 +32,15 @@ export function getSiteUrl(): string {
   }
   return url.replace(/\/$/, "");
 }
+
+// Every plan charges the same one-time signup fee, so there's one Price ID
+// to manage rather than one per plan. Env-based (not hardcoded) because it
+// differs between Stripe test and live mode — swap the env var when going
+// live, no code change needed.
+export function getSignupFeePriceId(): string {
+  const priceId = process.env.STRIPE_SIGNUP_FEE_PRICE_ID;
+  if (!priceId) {
+    throw new Error("STRIPE_SIGNUP_FEE_PRICE_ID environment variable is not set.");
+  }
+  return priceId;
+}

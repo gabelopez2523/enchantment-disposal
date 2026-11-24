@@ -2,10 +2,17 @@
 
 import { useRef, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
+import Script from "next/script";
 import Link from "next/link";
 import { createCheckoutSession } from "./actions/createCheckoutSession";
 import { joinWaitlist } from "@/app/actions/joinWaitlist";
 import { serviceAreas } from "@/data/serviceAreas";
+
+declare global {
+  interface Window {
+    turnstile?: { reset: (container?: HTMLElement) => void };
+  }
+}
 
 // @mapbox/search-js-react touches `document` at module load, which breaks
 // Next's server-side prerendering even inside a "use client" component —
@@ -21,6 +28,10 @@ const AddressAutofill = dynamic(
 // here.
 const MAPBOX_PUBLIC_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
+// Public site key, safe to expose client-side by design — the actual
+// verification happens server-side against TURNSTILE_SECRET_KEY.
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
 export default function SignupPage() {
   const [formData, setFormData] = useState({
     planId: "",
@@ -35,6 +46,24 @@ export default function SignupPage() {
   // suggestion back into the input directly), so we read the live DOM value
   // at submit time instead of mirroring it into state on every keystroke.
   const addressInputRef = useRef<HTMLInputElement>(null);
+
+  // Turnstile's implicit widget renders a hidden `cf-turnstile-response`
+  // input inside this container and keeps it updated — read it the same
+  // way the address field is read, straight from the DOM at submit time.
+  const turnstileRef = useRef<HTMLDivElement>(null);
+
+  const getTurnstileToken = () =>
+    turnstileRef.current?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')
+      ?.value ?? "";
+
+  // Turnstile tokens are single-use — after a failed attempt (whether the
+  // captcha itself failed or the form was rejected for an unrelated reason),
+  // the widget needs a fresh token before the next submit will work.
+  const resetTurnstile = () => {
+    if (typeof window !== "undefined" && window.turnstile && turnstileRef.current) {
+      window.turnstile.reset(turnstileRef.current);
+    }
+  };
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -61,9 +90,11 @@ export default function SignupPage() {
       return;
     }
 
+    const turnstileToken = getTurnstileToken();
+
     startTransition(async () => {
       try {
-        const result = await createCheckoutSession({ ...formData, address });
+        const result = await createCheckoutSession({ ...formData, address, turnstileToken });
 
         if (result.success) {
           window.location.href = result.url;
@@ -74,30 +105,35 @@ export default function SignupPage() {
               ? result.errorCode
               : null
           );
+          resetTurnstile();
         }
       } catch (err) {
         console.error("Signup submission error:", err);
         setError("Unable to start checkout. Please try again or contact us directly.");
+        resetTurnstile();
       }
     });
   };
 
   const handleJoinWaitlist = () => {
     const address = addressInputRef.current?.value.trim() ?? "";
+    const turnstileToken = getTurnstileToken();
 
     startTransition(async () => {
       try {
-        const result = await joinWaitlist({ ...formData, address });
+        const result = await joinWaitlist({ ...formData, address, turnstileToken });
         if (result.success) {
           setWaitlistJoined(true);
           setError(null);
           setErrorCode(null);
         } else {
           setError(result.error);
+          resetTurnstile();
         }
       } catch (err) {
         console.error("Join waitlist error:", err);
         setError("Unable to join the waitlist. Please try again or contact us directly.");
+        resetTurnstile();
       }
     });
   };
@@ -124,6 +160,7 @@ export default function SignupPage() {
 
   return (
     <div className="bg-white min-h-screen">
+      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" />
       <div className="w-full bg-[#BF0A30] py-6 sm:py-8 px-4 mb-6 text-center rounded text-white">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Sign Up for Weekly Pickup</h1>
       </div>
@@ -240,6 +277,8 @@ export default function SignupPage() {
               disabled={isPending}
             />
           </AddressAutofill>
+
+          <div ref={turnstileRef} className="cf-turnstile flex justify-center" data-sitekey={TURNSTILE_SITE_KEY} />
 
           <button
             type="submit"

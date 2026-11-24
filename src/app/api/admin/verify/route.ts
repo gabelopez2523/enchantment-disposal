@@ -2,17 +2,38 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminActionToken } from "@/lib/adminLink";
 import { approveReservation, cancelReservation, rejectReservation } from "@/lib/adminActions";
 
+// result.message (see adminActions.ts) interpolates reservation.customerName,
+// which comes straight from the public signup form — escape before rendering
+// so a malicious name can't run script in the admin's browser when they open
+// this link from the approval email.
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function htmlResponse(title: string, message: string, status = 200) {
+  const safeTitle = escapeHtml(title);
+  const safeMessage = escapeHtml(message);
   return new NextResponse(
     `<!DOCTYPE html>
     <html>
-      <head><meta charset="utf-8" /><title>${title}</title></head>
+      <head><meta charset="utf-8" /><title>${safeTitle}</title></head>
       <body style="font-family: Arial, sans-serif; max-width: 480px; margin: 60px auto; text-align: center; color: #333;">
-        <h2 style="color: #BF0A30;">${title}</h2>
-        <p>${message}</p>
+        <h2 style="color: #BF0A30;">${safeTitle}</h2>
+        <p>${safeMessage}</p>
       </body>
     </html>`,
-    { status, headers: { "Content-Type": "text/html" } }
+    {
+      status,
+      headers: {
+        "Content-Type": "text/html",
+        "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+      },
+    }
   );
 }
 

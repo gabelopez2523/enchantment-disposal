@@ -1,14 +1,12 @@
 // Client-safe service/plan catalog — names, labels, display prices, and
 // Stripe Price IDs only. No geometry here (see src/data/geo/, server-only).
 //
-// NOTE: SIGNUP_FEE_PRICE_ID / recurringPriceId below are placeholders.
-// Create the real one-time (signup fee) and recurring (monthly) Price
-// objects in the Stripe dashboard and swap these in before launch.
-
-// Every plan charges the same one-time signup fee — set it here once, not
-// per plan, so there's only one place to paste the real Price ID (and one
-// less chance of a typo on any single plan).
-export const SIGNUP_FEE_PRICE_ID = "price_1UbQkrReJeb6RwexWy7dS7Lx";
+// NOTE: recurringPriceId below is a placeholder. Create the real recurring
+// (monthly) Price objects in the Stripe dashboard and swap these in before
+// launch. The one-time signup fee's Price ID lives in an env var instead
+// (STRIPE_SIGNUP_FEE_PRICE_ID, read via getSignupFeePriceId() in
+// src/lib/stripe.ts) since every plan shares it and it differs between
+// Stripe test and live mode.
 
 export type BinSize = "64gal" | "96gal";
 

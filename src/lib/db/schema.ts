@@ -5,6 +5,7 @@ import {
   numeric,
   timestamp,
   uuid,
+  index,
 } from "drizzle-orm/pg-core";
 
 // The real capacity constraint: physical bin stock, shared across both
@@ -73,3 +74,18 @@ export const waitlist = pgTable("waitlist", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// Backs a Postgres-based rate limiter (see src/lib/db/rateLimit.ts) for the
+// public signup/waitlist forms — no new infra (Redis, etc.) needed since
+// everything else in this app already goes through this same database.
+// key is e.g. "signup:<ip>" or "waitlist:<ip>"; one row per attempt, counted
+// within a trailing window and pruned once past it.
+export const rateLimitAttempts = pgTable(
+  "rate_limit_attempts",
+  {
+    id: uuid("id").primaryKey(),
+    key: text("key").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("rate_limit_key_created_idx").on(table.key, table.createdAt)]
+);

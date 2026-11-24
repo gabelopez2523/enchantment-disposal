@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { SIGNUP_FEE_PRICE_ID, findPlan } from "@/data/serviceAreas";
+import { findPlan } from "@/data/serviceAreas";
 import { matchAddressToServiceArea } from "@/lib/signupIntake";
 import {
   attachCheckoutSession,
@@ -9,7 +9,10 @@ import {
   reserveSlot,
   sweepExpiredReservations,
 } from "@/lib/db/reservations";
-import { getSiteUrl, stripe } from "@/lib/stripe";
+import { checkRateLimit } from "@/lib/db/rateLimit";
+import { getClientIp } from "@/lib/clientIp";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { getSignupFeePriceId, getSiteUrl, stripe } from "@/lib/stripe";
 
 const inputSchema = z.object({
   planId: z.string().min(1),
@@ -17,20 +20,48 @@ const inputSchema = z.object({
   email: z.string().trim().email("Please provide a valid email address."),
   phone: z.string().trim().min(7, "Please provide a valid phone number."),
   address: z.string().trim().min(10, "Please provide your full street address."),
+  turnstileToken: z.string().optional(),
 });
 
 type Input = z.infer<typeof inputSchema>;
 
 type CheckoutResult =
   | { success: true; url: string }
-  | { success: false; error: string; errorCode?: "outside_service_area" | "out_of_stock" };
+  | {
+      success: false;
+      error: string;
+      errorCode?: "outside_service_area" | "out_of_stock" | "rate_limited" | "captcha_failed";
+    };
 
 export async function createCheckoutSession(input: Input): Promise<CheckoutResult> {
   const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? "Please check your information." };
   }
-  const { planId, name, email, phone, address } = parsed.data;
+  const { planId, name, email, phone, address, turnstileToken } = parsed.data;
+
+  // Both checks guard the same risk: a bot repeatedly reserving bin
+  // capacity (reserveSlot, below) without ever paying. Rate limit first
+  // since it's a local DB check, before spending a round trip on Turnstile.
+  const ip = await getClientIp();
+
+  const withinLimit = await checkRateLimit(`signup:${ip}`, 5, 15);
+  if (!withinLimit) {
+    return {
+      success: false,
+      error: "Too many signup attempts from this connection. Please wait a few minutes and try again.",
+      errorCode: "rate_limited",
+    };
+  }
+
+  const captchaOk = await verifyTurnstileToken(turnstileToken, ip);
+  if (!captchaOk) {
+    return {
+      success: false,
+      error: "Captcha verification failed. Please try again.",
+      errorCode: "captcha_failed",
+    };
+  }
 
   const match = findPlan(planId);
   if (!match) {
@@ -96,7 +127,7 @@ export async function createCheckoutSession(input: Input): Promise<CheckoutResul
         customer_email: email,
         customer_creation: "always",
         payment_intent_data: { capture_method: "manual" },
-        line_items: [{ price: SIGNUP_FEE_PRICE_ID, quantity: 1 }],
+        line_items: [{ price: getSignupFeePriceId(), quantity: 1 }],
         success_url: `${siteUrl}/signup/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${siteUrl}/signup/cancel`,
         metadata: { reservationId: reservation.id },
