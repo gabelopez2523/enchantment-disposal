@@ -311,7 +311,11 @@ export default function SignupPage() {
             />
           </AddressAutofill>
 
-          <div ref={turnstileRef} className="cf-turnstile flex justify-center" data-sitekey={TURNSTILE_SITE_KEY} />
+          <div
+            ref={turnstileRef}
+            className="cf-turnstile flex justify-center !mt-8"
+            data-sitekey={TURNSTILE_SITE_KEY}
+          />
 
           <button
             type="submit"
