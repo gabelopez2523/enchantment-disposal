@@ -388,9 +388,14 @@ async function releaseHeldSlot(
 
   if (updated.length === 0) return; // already transitioned by a concurrent caller
 
+  // GREATEST(...,0) floors this at zero — every caller here already went
+  // through a status-guarded reservation row, but this is the one place
+  // that decrements the shared counter, so it's the right spot for a floor
+  // against it ever reading negative (e.g. a hand-inserted/edited row that
+  // never incremented it in the first place).
   await db
     .update(binInventory)
-    .set({ activeCount: sql`${binInventory.activeCount} - 1`, updatedAt: sql`now()` })
+    .set({ activeCount: sql`GREATEST(${binInventory.activeCount} - 1, 0)`, updatedAt: sql`now()` })
     .where(eq(binInventory.id, binSize));
 
   // Single chokepoint for every way a unit can free up (cancel, reject,
