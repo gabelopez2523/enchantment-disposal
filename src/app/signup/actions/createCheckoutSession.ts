@@ -128,6 +128,14 @@ export async function createCheckoutSession(input: Input): Promise<CheckoutResul
         customer_creation: "always",
         payment_intent_data: { capture_method: "manual" },
         line_items: [{ price: getSignupFeePriceId(), quantity: 1 }],
+        // Stripe calculates the right tax for the customer's address rather
+        // than a single hardcoded rate — needed because NM gross receipts
+        // tax varies by jurisdiction, and this app's two service areas
+        // (Glorieta vs Surrounding) may not share the same rate. Requires
+        // Stripe Tax to be enabled and configured in the dashboard (tax
+        // origin address, registered jurisdictions, and a tax code set on
+        // the signup-fee Price) — this call alone doesn't turn it on.
+        automatic_tax: { enabled: true },
         success_url: `${siteUrl}/signup/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${siteUrl}/signup/cancel`,
         metadata: { reservationId: reservation.id },
