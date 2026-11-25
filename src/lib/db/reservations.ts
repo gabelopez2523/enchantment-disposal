@@ -288,19 +288,19 @@ export async function expireReservationBySessionId(sessionId: string): Promise<v
  * such a reservation just sits in pending_payment holding a unit until the
  * next *unrelated* checkout attempt happens to sweep expired holds —
  * called directly, by id, right at the failure site instead so a failed
- * attempt never leaks capacity even briefly.
+ * attempt never leaks capacity even briefly. Also used as the admin
+ * dashboard's manual "Release Abandoned Checkout" action, for a customer
+ * who started checkout then walked away without the 30-minute hold expiring
+ * on its own yet (see HOLD_MINUTES above).
  */
-export async function releaseUncommittedReservation(reservationId: string): Promise<void> {
-  const rows = await db
-    .select({ id: reservations.id, binSize: reservations.binSize })
-    .from(reservations)
-    .where(and(eq(reservations.id, reservationId), eq(reservations.status, "pending_payment")))
-    .limit(1);
+export async function releaseUncommittedReservation(
+  reservationId: string
+): Promise<{ ok: boolean; reservation?: typeof reservations.$inferSelect }> {
+  const before = await getReservationById(reservationId);
+  if (!before || before.status !== "pending_payment") return { ok: false };
 
-  const row = rows[0];
-  if (!row) return; // already resolved somehow — no-op
-
-  await releaseHeldSlot(row.id, row.binSize, "expired", "pending_payment");
+  await releaseHeldSlot(reservationId, before.binSize, "expired", "pending_payment");
+  return { ok: true, reservation: { ...before, status: "expired" } };
 }
 
 /**

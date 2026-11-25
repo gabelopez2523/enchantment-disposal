@@ -4,7 +4,11 @@
 // the two entry points can never drift apart on side effects (Stripe
 // capture/cancel, bin-inventory release, notification emails).
 
-import { cancelActiveReservation, resolveVerification } from "@/lib/db/reservations";
+import {
+  cancelActiveReservation,
+  releaseUncommittedReservation,
+  resolveVerification,
+} from "@/lib/db/reservations";
 import { sendActiveSignupEmail } from "@/lib/email/sendActiveSignupEmail";
 import { stripe } from "@/lib/stripe";
 
@@ -84,6 +88,27 @@ export async function rejectReservation(reservationId: string): Promise<AdminAct
   return {
     ok: true,
     message: `${reservation.customerName}'s signup was rejected, their slot was released, and ${chargeNote}.`,
+  };
+}
+
+// For a reservation stuck in pending_payment — a customer started checkout
+// and never finished (no card details submitted, or they abandoned the
+// Stripe page). No money was ever collected, so there's nothing to cancel
+// in Stripe here, unlike the other three actions above.
+export async function releaseAbandonedReservation(reservationId: string): Promise<AdminActionResult> {
+  const { ok, reservation } = await releaseUncommittedReservation(reservationId);
+
+  if (!ok || !reservation) {
+    return {
+      ok: false,
+      message:
+        "This signup is no longer awaiting payment (it already completed, expired, or was already released) — no action was taken.",
+    };
+  }
+
+  return {
+    ok: true,
+    message: `${reservation.customerName}'s abandoned checkout was released and their slot freed up. No payment was ever collected for this attempt.`,
   };
 }
 

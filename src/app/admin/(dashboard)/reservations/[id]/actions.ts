@@ -1,7 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { approveReservation, cancelReservation, rejectReservation } from "@/lib/adminActions";
+import {
+  approveReservation,
+  cancelReservation,
+  rejectReservation,
+  releaseAbandonedReservation,
+} from "@/lib/adminActions";
 
 function redirectWithResult(id: string, result: { ok: boolean; message: string }): never {
   const params = new URLSearchParams({ ok: String(result.ok), message: result.message });
@@ -18,4 +23,8 @@ export async function rejectAction(id: string): Promise<void> {
 
 export async function cancelAction(id: string): Promise<void> {
   redirectWithResult(id, await cancelReservation(id));
+}
+
+export async function releaseAction(id: string): Promise<void> {
+  redirectWithResult(id, await releaseAbandonedReservation(id));
 }
