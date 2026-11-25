@@ -195,25 +195,58 @@ export default function SignupPage() {
             </div>
           )}
 
-          <select
-            className="w-full border border-gray-300 p-3 rounded text-black text-sm sm:text-base"
-            name="planId"
-            value={formData.planId}
-            onChange={handleChange}
-            required
-            disabled={isPending}
-          >
-            <option value="">Select a Plan</option>
-            {serviceAreas.map((area) => (
-              <optgroup key={area.id} label={area.name}>
-                {area.plans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>
-                    {plan.label} — {plan.monthlyPrice}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Plan</label>
+            <p className="text-xs text-gray-500 mb-3">
+              Pricing depends on your service area — pick the plan that matches your address below.
+            </p>
+            <div className="space-y-4">
+              {serviceAreas.map((area) => (
+                <div key={area.id}>
+                  <h3 className="font-bold text-base text-[#BF0A30] mb-2">{area.name}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {area.plans.map((plan) => {
+                      const isSelected = formData.planId === plan.id;
+                      return (
+                        <label
+                          key={plan.id}
+                          className={`flex flex-col gap-1 border rounded p-3 text-sm sm:text-base ${
+                            isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                          } ${
+                            isSelected
+                              ? "border-[#BF0A30] bg-red-50 ring-1 ring-[#BF0A30]"
+                              : "border-gray-300 hover:border-gray-400"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="planId"
+                            value={plan.id}
+                            checked={isSelected}
+                            onChange={handleChange}
+                            required
+                            disabled={isPending}
+                            className="sr-only"
+                          />
+                          <span className="flex items-center gap-2">
+                            <span
+                              className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
+                                isSelected ? "border-[#BF0A30] bg-[#BF0A30]" : "border-gray-400"
+                              }`}
+                            />
+                            <span className="text-gray-900">{plan.label}</span>
+                          </span>
+                          <span className="font-semibold text-gray-900 pl-6">
+                            {plan.monthlyPrice}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <input
             className="w-full border border-gray-300 p-3 rounded placeholder-gray-600 text-black text-sm sm:text-base"

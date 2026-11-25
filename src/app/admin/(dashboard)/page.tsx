@@ -5,6 +5,7 @@ import { serviceAreas } from "@/data/serviceAreas";
 
 const STATUS_TABS: Array<{ label: string; value: ReservationStatus | "" }> = [
   { label: "All", value: "" },
+  { label: "Awaiting Payment", value: "pending_payment" },
   { label: "Pending", value: "pending_verification" },
   { label: "Active", value: "active" },
   { label: "Rejected", value: "rejected" },
