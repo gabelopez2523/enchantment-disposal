@@ -1,0 +1,163 @@
+"use server";
+
+import { z } from "zod";
+import { findPlan } from "@/data/serviceAreas";
+import { matchAddressToServiceArea } from "@/lib/signupIntake";
+import {
+  attachCheckoutSession,
+  releaseUncommittedReservation,
+  reserveSlot,
+  sweepExpiredReservations,
+} from "@/lib/db/reservations";
+import { checkRateLimit } from "@/lib/db/rateLimit";
+import { getClientIp } from "@/lib/clientIp";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { getSignupFeePriceId, getSiteUrl, stripe } from "@/lib/stripe";
+
+const inputSchema = z.object({
+  planId: z.string().min(1),
+  name: z.string().trim().min(2, "Please provide a valid name."),
+  email: z.string().trim().email("Please provide a valid email address."),
+  phone: z.string().trim().min(7, "Please provide a valid phone number."),
+  address: z.string().trim().min(10, "Please provide your full street address."),
+  turnstileToken: z.string().optional(),
+});
+
+type Input = z.infer<typeof inputSchema>;
+
+type CheckoutResult =
+  | { success: true; url: string }
+  | {
+      success: false;
+      error: string;
+      errorCode?: "outside_service_area" | "out_of_stock" | "rate_limited" | "captcha_failed";
+    };
+
+export async function createCheckoutSession(input: Input): Promise<CheckoutResult> {
+  const parsed = inputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Please check your information." };
+  }
+  const { planId, name, email, phone, address, turnstileToken } = parsed.data;
+
+  // Both checks guard the same risk: a bot repeatedly reserving bin
+  // capacity (reserveSlot, below) without ever paying. Rate limit first
+  // since it's a local DB check, before spending a round trip on Turnstile.
+  const ip = await getClientIp();
+
+  const withinLimit = await checkRateLimit(`signup:${ip}`, 5, 15);
+  if (!withinLimit) {
+    return {
+      success: false,
+      error: "Too many signup attempts from this connection. Please wait a few minutes and try again.",
+      errorCode: "rate_limited",
+    };
+  }
+
+  const captchaOk = await verifyTurnstileToken(turnstileToken, ip);
+  if (!captchaOk) {
+    return {
+      success: false,
+      error: "Captcha verification failed. Please try again.",
+      errorCode: "captcha_failed",
+    };
+  }
+
+  const match = findPlan(planId);
+  if (!match) {
+    return { success: false, error: "That plan is no longer available. Please refresh and try again." };
+  }
+  const { area: selectedArea, plan } = match;
+
+  try {
+    // Release any abandoned checkout holds before checking capacity — this
+    // is the primary mechanism for freeing a slot after cart abandonment
+    // (no cron job required); Stripe's own session.expired webhook is a
+    // second, idempotent path to the same release.
+    await sweepExpiredReservations();
+
+    const addressMatch = await matchAddressToServiceArea(address, selectedArea);
+
+    if ("outside" in addressMatch) {
+      return {
+        success: false,
+        error:
+          "Sorry, that address is outside our current service area. Please call or email us if you believe this is a mistake. We will be happy to assist you. Our contact form can be found here.",
+        errorCode: "outside_service_area",
+      };
+    }
+
+    const reservation = await reserveSlot({
+      serviceAreaId: addressMatch.serviceAreaId,
+      binSize: plan.binSize,
+      planId,
+      customerName: name,
+      customerEmail: email,
+      customerPhone: phone,
+      addressRaw: address,
+      addressFormatted: addressMatch.formatted,
+      lat: addressMatch.lat,
+      lng: addressMatch.lng,
+      verificationReason: addressMatch.verificationReason,
+    });
+
+    if (!reservation) {
+      return {
+        success: false,
+        error:
+          "We're currently out of stock on that bin size. You can join the waitlist below and we'll reach out as soon as a spot opens up.",
+        errorCode: "out_of_stock",
+      };
+    }
+
+    const siteUrl = getSiteUrl();
+
+    try {
+      // This phase only collects the one-time signup fee — recurring billing
+      // (plan.recurringPriceId) is set up manually, outside Stripe, for now.
+      // customer_creation is forced so we still get a Stripe Customer record
+      // to reference later, since "payment" mode doesn't create one by default.
+      //
+      // capture_method: "manual" authorizes the card without charging it —
+      // every signup now needs client approval first, so the charge is only
+      // captured on Approve (and the hold is simply canceled on Reject, with
+      // no charge or refund ever happening either way).
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer_email: email,
+        customer_creation: "always",
+        payment_intent_data: { capture_method: "manual" },
+        line_items: [{ price: getSignupFeePriceId(), quantity: 1 }],
+        success_url: `${siteUrl}/signup/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${siteUrl}/signup/cancel`,
+        metadata: { reservationId: reservation.id },
+      });
+
+      if (!session.url) {
+        throw new Error("Stripe did not return a Checkout URL.");
+      }
+
+      await attachCheckoutSession(reservation.id, session.id);
+
+      return { success: true, url: session.url };
+    } catch (err) {
+      // Stripe never got a session attached to this reservation, so no
+      // webhook will ever arrive to resolve it, and it has no session id
+      // for the lazy sweep to key off of either — release it immediately
+      // rather than leaving it to hold a bin unit until an unrelated later
+      // checkout attempt happens to sweep expired holds.
+      console.error("Stripe checkout session creation failed:", err);
+      await releaseUncommittedReservation(reservation.id);
+      return {
+        success: false,
+        error: "Something went wrong starting checkout. Please try again or contact us directly.",
+      };
+    }
+  } catch (err) {
+    console.error("Failed to start checkout:", err);
+    return {
+      success: false,
+      error: "Something went wrong starting checkout. Please try again or contact us directly.",
+    };
+  }
+}
